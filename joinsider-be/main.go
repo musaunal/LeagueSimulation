@@ -38,7 +38,7 @@ func main() {
 	r.HandleFunc("/leagues/{id}/distribute-fixture", distributeFixture(&allleague))
 	r.HandleFunc("/leagues/{id}/play-one-week", playOneWeek(&allleague))
 	r.HandleFunc("/leagues/{id}/play-all", playAll(&allleague))
-	r.HandleFunc("/leagues/{id}/predict-leaders", predict())
+	r.HandleFunc("/leagues/{id}/predict-leaders", predict(&allleague))
 
 	http.ListenAndServe(":80", r)
 }

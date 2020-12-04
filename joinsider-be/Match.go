@@ -39,15 +39,20 @@ type prediction struct {
 }
 
 func sampleFixture() []fixture {
-	pool := make([]fixture, 8)
+	pool := make([]fixture, 12)
 	pool[0] = fixture{0, 1, "Chelsea", "Arsenal", false, 0, 0}
 	pool[1] = fixture{1, 1, "Manchester City", "Liverpool", false, 0, 0}
 	pool[2] = fixture{2, 2, "Chelsea", "Liverpool", false, 0, 0}
 	pool[3] = fixture{3, 2, "Manchester City", "Arsenal", false, 0, 0}
-	pool[4] = fixture{4, 3, "Arsenal", "Chelsea", false, 0, 0}
-	pool[5] = fixture{5, 3, "Liverpool", "Manchester City", false, 0, 0}
-	pool[6] = fixture{6, 4, "Liverpool", "Chelsea", false, 0, 0}
-	pool[7] = fixture{7, 4, "Arsenal", "Manchester City", false, 0, 0}
+	pool[4] = fixture{4, 3, "Chelsea", "Manchester City", false, 0, 0}
+	pool[5] = fixture{5, 3, "Liverpool", "Arsenal", false, 0, 0}
+
+	pool[6] = fixture{6, 4, "Arsenal", "Chelsea", false, 0, 0}
+	pool[7] = fixture{7, 4, "Liverpool", "Manchester City", false, 0, 0}
+	pool[8] = fixture{8, 5, "Liverpool", "Chelsea", false, 0, 0}
+	pool[9] = fixture{9, 5, "Arsenal", "Manchester City", false, 0, 0}
+	pool[10] = fixture{10, 6, "Manchester City", "Chelsea", false, 0, 0}
+	pool[11] = fixture{11, 6, "Arsenal", "Liverpool", false, 0, 0}
 	return pool
 }
 
@@ -83,6 +88,8 @@ func updateScoreBoard(s1 int, s2 int, board *[]scores, team1 string, team2 strin
 	if s1 == s2 {
 		(*board)[teamNameToID(team1)].Drawn++
 		(*board)[teamNameToID(team2)].Drawn++
+		(*board)[teamNameToID(team1)].Points++
+		(*board)[teamNameToID(team2)].Points++
 	} else if s1 > s2 {
 		(*board)[teamNameToID(team1)].Won++
 		(*board)[teamNameToID(team1)].Points += 3
@@ -98,12 +105,39 @@ func updateScoreBoard(s1 int, s2 int, board *[]scores, team1 string, team2 strin
 
 }
 
-func initPredictions() []prediction {
+func getRate(val int, sum int) int {
+	if currentWeek == 4 {
+		return val * 100 / sum
+	} else {
+		return (val * val * 400) / (sum * sum)
+	}
+}
+
+func calcPredictions(scores []scores) []prediction {
+	sum := 0
+	biggests := 0
+	bigIndex := 0
+	for i := 0; i < len(scores); i++ {
+		sum += scores[i].Points
+		if scores[i].Points > biggests {
+			biggests = scores[i].Points
+			bigIndex = i
+		}
+	}
+
 	var pool = make([]prediction, 4)
-	pool[0] = prediction{0, "Chelsea", 25}
-	pool[1] = prediction{1, "Arsenal", 25}
-	pool[2] = prediction{2, "Manchester City", 25}
-	pool[3] = prediction{3, "Liverpool", 25}
+	if currentWeek != 6 {
+		pool[0] = prediction{0, "Chelsea", getRate(scores[0].Points, sum)}
+		pool[1] = prediction{1, "Arsenal", getRate(scores[1].Points, sum)}
+		pool[2] = prediction{2, "Manchester City", getRate(scores[2].Points, sum)}
+		pool[3] = prediction{3, "Liverpool", getRate(scores[3].Points, sum)}
+	} else {
+		pool[0] = prediction{0, "Chelsea", 0}
+		pool[1] = prediction{1, "Arsenal", 0}
+		pool[2] = prediction{2, "Manchester City", 0}
+		pool[3] = prediction{3, "Liverpool", 0}
+		pool[bigIndex].Rate = 100
+	}
 	return pool
 }
 
@@ -123,7 +157,7 @@ func playOneWeek(list *[]league) func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		j, _ := strconv.Atoi(vars["id"])
 
-		if currentWeek < 4 && isLeagueStarted {
+		if currentWeek < 6 && isLeagueStarted {
 			r1 := rand.NewSource(time.Now().UnixNano())
 			r := rand.New(r1)
 
@@ -151,11 +185,11 @@ func playAll(list *[]league) func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		j, _ := strconv.Atoi(vars["id"])
 
-		if currentWeek < 4 && isLeagueStarted {
+		if currentWeek < 6 && isLeagueStarted {
 			r1 := rand.NewSource(time.Now().UnixNano())
 			r := rand.New(r1)
 
-			for k := currentWeek; k < 4; k++ {
+			for k := currentWeek; k < 6; k++ {
 				for i := 0; i < 2; i++ {
 					score1 := r.Intn(5)
 					score2 := r.Intn(5)
@@ -175,14 +209,16 @@ func playAll(list *[]league) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func predict() func(w http.ResponseWriter, r *http.Request) {
+func predict(list *[]league) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-		w.WriteHeader(http.StatusCreated)
+		if currentWeek >= 4 {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+			w.WriteHeader(http.StatusCreated)
 
-		enc := json.NewEncoder(w)
-		enc.Encode(initPredictions())
+			enc := json.NewEncoder(w)
+			enc.Encode(calcPredictions((*list)[0].ScoreBoard))
+		}
 	}
 }
