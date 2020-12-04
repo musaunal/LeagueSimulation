@@ -10,6 +10,7 @@ npm run serve
 ### Backend setup and run
 ```
 cd joinsider-be
+go get -u github.com/gorilla/mux
 go build & joinsider-be.exe
 ```
 
