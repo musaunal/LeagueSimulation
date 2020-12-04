@@ -62,7 +62,7 @@ func addLeague(list *[]league) func(w http.ResponseWriter, r *http.Request) {
 		// fmt.Println(r.Form)
 		// fmt.Println(r.PostForm)
 
-		// for key, value := range vars {
+		// for key, value := range r.Form {
 		// 	fmt.Printf("%s = %s\n", key, value)
 		// }
 		// fmt.Println("request  " + r.RequestURI)

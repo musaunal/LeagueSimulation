@@ -12,3 +12,6 @@ npm run serve
 cd joinsider-be
 go build & joinsider-be.exe
 ```
+
+*Backend port is 80*
+*Frontend port is 8080*

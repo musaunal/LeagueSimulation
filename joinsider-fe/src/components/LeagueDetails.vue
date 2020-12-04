@@ -43,7 +43,7 @@
             </template>
 
             <template v-slot:[`item.name`]="{item}">
-                <router-link :to="`/leagues/${item.id}/teams`">{{ item.name }}</router-link>
+                <router-link :to="`/leagues/0/teams/${item.id}`">{{ item.name }}</router-link>
             </template>
             <template v-slot:[`item.actions`]="{item}">
                 <v-icon

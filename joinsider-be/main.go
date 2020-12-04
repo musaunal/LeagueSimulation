@@ -22,10 +22,10 @@ func main() {
 	allleague := make([]league, 1)
 	teams := make([]team, 4)
 	allleague[0] = league{id, "premier", "1", "30", "15-09-2020", "17-12-2020", [2]string{"edit", "delete"}, initScoreBoard(), nil}
-	teams[0] = team{teamID, "Chelsea", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
-	teams[1] = team{teamID, "Arsenal", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
-	teams[2] = team{teamID, "Manchester City", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
-	teams[3] = team{teamID, "Liverpool", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
+	teams[0] = team{0, "Chelsea", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
+	teams[1] = team{1, "Arsenal", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
+	teams[2] = team{2, "Manchester City", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
+	teams[3] = team{3, "Liverpool", "premier", time.Now().Format("01-02-2006"), [2]string{"edit", "delete"}}
 
 	/*** Routings ***/
 	r := mux.NewRouter()
